@@ -5,44 +5,9 @@ This code is in the Runtime layer.
 """
 
 from collections import namedtuple
-from hashlib import md5
 
 
-class _FragmentResource(namedtuple("_FragmentResource", "kind, data, mimetype, placement")):
-    """ Class for a Fragment's resource: javascript, css, and the like"""
-    #pylint: disable=E1101
-
-    def __repr__(self):
-        instance_str = "_FragmentResource(kind=%r data=%r mimetype=%r placement=%r)"
-
-        return instance_str % (self.kind, self.data, self.mimetype, self.placement)
-
-
-    @property
-    def _undigested_hash(self):
-        """ An 'undigested' hash for this object. Useful for hashing multiple
-        `_FragmentResource` objects together.
-        """
-        md5_hash = md5()
-        md5_hash.update(self.kind)
-        md5_hash.update(self.data)
-        md5_hash.update(self.mimetype)
-        md5_hash.update(self.placement)
-        return md5_hash
-
-
-    def __hash__(self):
-        """ Hash based on fragment's fields"""
-        return int(self._undigested_hash.hexdigest(), 16)
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, _FragmentResource) and
-            self.kind == other.kind and
-            self.data == other.data and
-            self.mimetype == other.mimetype and
-            self.placement == other.placement
-        )
+_FragmentResource = namedtuple("_FragmentResource", "kind, data, mimetype, placement") # pylint: disable=C0103
 
 
 class Fragment(object):
@@ -70,23 +35,28 @@ class Fragment(object):
 
     @property
     def resources(self):
-        """ A list of unique resources by order of first appearance """
+        """
+        Returns list of unique `_FragmentResource`s by order of first appearance.
+        """
         seen = set()
         return [x for x in self._resources if x not in seen and not seen.add(x)]
 
     @resources.setter
     def resources(self, val):   #pylint: disable=E0102
-        """ Simple setter for resources """
+        """
+        Setter for `resources` property.
+        """
         self._resources = val
 
-
     def to_pods(self):
-        """Returns the data in a dictionary.
+        """
+        Returns the data in a dictionary.
 
-        'pods' = Plain Old Data Structure."""
+        'pods' = Plain Old Data Structure.
+        """
         return {
             'content': self.content,
-            'resources': [r._asdict() for r in self.resources], #pylint: disable=W0212
+            'resources': [r._asdict() for r in self.resources],  # pylint: disable=W0212
             'js_init': self.js_init
         }
 
@@ -274,8 +244,8 @@ class Fragment(object):
 
     @staticmethod
     def resource_to_html(resource):
-        """ Returns `resource` wrapped in the appropriate html tag for it's
-        mimetype.
+        """
+        Returns `resource` wrapped in the appropriate html tag for it's mimetype.
         """
         if resource.mimetype == "text/css":
             if resource.kind == "text":
