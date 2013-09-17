@@ -41,13 +41,6 @@ class Fragment(object):
         seen = set()
         return [x for x in self._resources if x not in seen and not seen.add(x)]
 
-    @resources.setter
-    def resources(self, val):   #pylint: disable=E0102
-        """
-        Setter for `resources` property.
-        """
-        self._resources = val
-
     def to_pods(self):
         """
         Returns the data in a dictionary.
@@ -56,7 +49,7 @@ class Fragment(object):
         """
         return {
             'content': self.content,
-            'resources': [r._asdict() for r in self.resources],  # pylint: disable=W0212
+            'resources': [r._asdict() for r in self._resources],  # pylint: disable=W0212
             'js_init': self.js_init
         }
 
